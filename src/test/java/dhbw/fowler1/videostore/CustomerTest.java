@@ -95,6 +95,18 @@ public class CustomerTest {
                 "You earned 4 frequent renter points";
         assertEquals(expected, customer.statement());
     }
+    
+    @Test
+    public void htmlStatementRentRegularMovieForOneDay() throws Exception {
+        customer.addRental(getRental("Killer Klowns from Outer Space", Movie.REGULAR, 1));
+
+        String expected = "<H1>Rentals for <EM>Arthur Dent</EM></H1><P>\n" +
+"Killer Klowns from Outer Space: 2.0<BR>\n" +
+"<P>You owe <EM>2.0</EM><P>\n" +
+"On this rental you earned <EM>1</EM> frequent renter points<P>";
+              
+        assertEquals(expected, customer.htmlStatement());
+    }
 
     private Rental getRental(String title, int priceCode, int daysRented) {
         Movie movie = new Movie(title, priceCode);
