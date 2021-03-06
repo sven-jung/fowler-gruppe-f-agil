@@ -13,27 +13,15 @@ public class Customer {
     }
 
     public String statement() {
-
-        Enumeration rentals = _rentals.elements();
-        String result = "Rental Record for " + getName() + "\n";
-        while (rentals.hasMoreElements()) {
-
-            Rental each = (Rental) rentals.nextElement();
-
-            //show figures for this rental
-            result += "\t" + each.getMovie().getTitle() + "\t"
-                    + String.valueOf(each.getCharge()) + "\n";
-
-        }
-        //add footer lines
-        result += "Amount owed is " + String.valueOf(getTotalCharge()) + "\n";
-        result += "You earned " + String.valueOf(getTotalFrequentRenterPoints())
-                + " frequent renter points";
-        return result;
+        return new TextStatement().value(this);
     }
 
     public void addRental(Rental arg) {
         _rentals.addElement(arg);
+    }
+
+    public Enumeration getRentals() {
+        return _rentals.elements();
     }
 
     public String getName() {
@@ -61,21 +49,74 @@ public class Customer {
     }
 
     public String htmlStatement() {
-        Enumeration rentals = _rentals.elements();
-        String result = "<H1>Rentals for <EM>" + getName() + "</EM></H1><P>\n";
-        while (rentals.hasMoreElements()) {
-            Rental each = (Rental) rentals.nextElement();
-            //show figures for each rental
-            result += each.getMovie().getTitle() + ": "
-                    + String.valueOf(each.getCharge()) + "<BR>\n";
+        return new HtmlStatement().value(this);
+    }
+
+    abstract class Statement {
+
+        public String value(Customer aCustomer) {
+            Enumeration rentals = aCustomer.getRentals();
+            String result = headerString(aCustomer);
+            while (rentals.hasMoreElements()) {
+                Rental each = (Rental) rentals.nextElement();
+                result += eachRentalString(each);
+            }
+            result += footerString(aCustomer);
+            return result;
         }
-        //add footer lines
-        result += "<P>You owe <EM>" + String.valueOf(getTotalCharge())
-                + "</EM><P>\n";
-        result += "On this rental you earned <EM>"
-                + String.valueOf(getTotalFrequentRenterPoints())
-                + "</EM> frequent renter points<P>";
-        return result;
+
+        abstract String headerString(Customer aCustomer);
+
+        abstract String eachRentalString(Rental aRental);
+
+        abstract String footerString(Customer aCustomer);
+
+    }
+
+    class TextStatement extends Statement {
+
+        @Override
+        String headerString(Customer aCustomer) {
+            return "Rental Record for " + aCustomer.getName() + "\n";
+        }
+
+        @Override
+        String eachRentalString(Rental aRental) {
+            return "\t" + aRental.getMovie().getTitle() + "\t"
+                    + String.valueOf(aRental.getCharge()) + "\n";
+        }
+
+        @Override
+        String footerString(Customer aCustomer) {
+            return "Amount owed is "
+                    + String.valueOf(aCustomer.getTotalCharge()) + "\n"
+                    + "You earned "
+                    + String.valueOf(aCustomer.getTotalFrequentRenterPoints())
+                    + " frequent renter points";
+        }
+    }
+
+    class HtmlStatement extends Statement {
+
+        @Override
+        String headerString(Customer aCustomer) {
+            return "<H1>Rentals for <EM>" + aCustomer.getName() + "</EM></H1><P>\n";
+        }
+
+        @Override
+        String eachRentalString(Rental aRental) {
+            return aRental.getMovie().getTitle() + ": "
+                    + String.valueOf(aRental.getCharge()) + "<BR>\n";
+        }
+
+        @Override
+        String footerString(Customer aCustomer) {
+            return "<P>You owe <EM>" + String.valueOf(getTotalCharge())
+                    + "</EM><P>\n"
+                    + "On this rental you earned <EM>"
+                    + String.valueOf(getTotalFrequentRenterPoints())
+                    + "</EM> frequent renter points<P>";
+        }
     }
 
 }
